@@ -1,5 +1,5 @@
 # Etapa 1: Construcción (builder)
-FROM node:21-alpine3.18 as builder
+FROM node:21-alpine3.18 AS builder
 
 
 # Habilitar Corepack y preparar pnpm
