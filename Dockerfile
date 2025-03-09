@@ -33,8 +33,9 @@ RUN pnpm install
 RUN pnpm run build
 
 
-# Etapa 2: Despliegue (deploy)
-FROM builder as deploy
+# Create a new stage for deployment
+FROM builder AS deploy
+
 
 # ******Establecer el directorio de trabajo
 WORKDIR /app
