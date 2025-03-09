@@ -32,7 +32,7 @@ RUN pnpm install
 FROM builder as deploy
 
 # Establecer el directorio de trabajo (se recomienda para que las rutas sean relativas)
-WORKDIR /app
+WORKDIR /test
 
 # Copy only necessary files and directories for deployment
 COPY --from=builder /app/dist ./dist
@@ -44,5 +44,5 @@ RUN pnpm install --frozen-lockfile --production
 
 
 # Define the command to start the application using PM2 runtime
-CMD ["pm2-runtime", "start", "./dist/app.js", "--cron", "0 */12 * * *"]
+CMD ["pm2-runtime", "start", "./test/app.js", "--cron", "0 */12 * * *"]
 
