@@ -1,37 +1,52 @@
-# Use the official Node.js image as the base image for building the application.
+# Etapa 1: Construcción (builder)
 FROM node:21-alpine3.18 as builder
 
-# Enable Corepack and prepare for PNPM installation
+
+# Habilitar Corepack y preparar pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
+
 ENV PNPM_HOME=/usr/local/bin
 
-# Set the working directory inside the container
+
+# Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copy package.json and pnpm-lock.yaml files to the working directory
+# Copiar archivos de dependencias
 COPY package*.json pnpm-lock.yaml ./
 
-# Install git for potential dependencies
+
+# Instalar git para dependencias que lo requieran
 RUN apk add --no-cache git
 
-# Install PM2 globally using PNPM
+
+# Instalar PM2 globalmente usando pnpm
 RUN pnpm install pm2 -g
 
-# Copy the application source code into the container
+
+# Copiar todo el código fuente al contenedor
 COPY . .
 
-# Install dependencies using PNPM
+# Instalar dependencias (incluye devDependencies para compilar)
 RUN pnpm install
 
-# Create a new stage for deployment
+# ******Compilar el código TypeScript usando Rollup (asegúrate de tener el script "build" en package.json)
+RUN pnpm run build
+
+
+# Etapa 2: Despliegue (deploy)
 FROM builder as deploy
 
-# Copy only necessary files and directories for deployment
-COPY --from=builder /app/src ./src
+# ******Establecer el directorio de trabajo
+WORKDIR /app
+
+# Copiar únicamente la carpeta compilada y archivos necesarios para producción
+COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json /app/pnpm-lock.yaml ./
 
-# Install production dependencies using frozen lock file
+
+# Instalar dependencias de producción (sin devDependencies)
 RUN pnpm install --frozen-lockfile --production
 
-# Define the command to start the application using PM2 runtime
-CMD ["pm2-runtime", "start", "./src/app.js", "--cron", "0 */12 * * *"]
+
+# Iniciar la aplicación usando PM2, apuntando al archivo compilado en la carpeta dist
+CMD ["pm2-runtime", "start", "./dist/app.js", "--cron", "0 */12 * * *"]
