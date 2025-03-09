@@ -10,13 +10,15 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": false,
-    "outDir": "./dist",
+    "outDir": "app",
     "baseUrl": "./",
     "rootDir": "./",
     "incremental": true,
     "skipLibCheck": true,
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
@@ -25,7 +27,7 @@
   ],
   "exclude": [
     "node_modules",
-    "dist",
+    "app",
     "**/*.test.ts",
     "**/*.spec.ts",
     "**e2e**",

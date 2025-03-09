@@ -27,11 +27,11 @@ RUN pnpm install
 FROM builder as deploy
 
 # Copy only necessary files and directories for deployment
-COPY --from=builder /dist/src ./src
-COPY --from=builder /dist/package.json /app/pnpm-lock.yaml ./
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/package.json /app/pnpm-lock.yaml ./
 
 # Install production dependencies using frozen lock file
 RUN pnpm install --frozen-lockfile --production
 
 # Define the command to start the application using PM2 runtime
-CMD ["pm2-runtime", "start", "./dist/src/app.js", "--cron", "0 */12 * * *"]
+CMD ["pm2-runtime", "start", "./src/app.js", "--cron", "0 */12 * * *"]
