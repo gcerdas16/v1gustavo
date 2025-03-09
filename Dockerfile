@@ -1,43 +1,37 @@
-# Etapa 1: Construcción (builder)
+# Use the official Node.js image as the base image for building the application.
 FROM node:21-alpine3.18 as builder
 
-# Habilitar Corepack y preparar pnpm
+# Enable Corepack and prepare for PNPM installation
 RUN corepack enable && corepack prepare pnpm@latest --activate
 ENV PNPM_HOME=/usr/local/bin
 
-# Establecer el directorio de trabajo
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copiar archivos de dependencias
+# Copy package.json and pnpm-lock.yaml files to the working directory
 COPY package*.json pnpm-lock.yaml ./
 
-# Instalar git para dependencias que lo requieran
+# Install git for potential dependencies
 RUN apk add --no-cache git
 
-# Instalar PM2 globalmente usando pnpm
+# Install PM2 globally using PNPM
 RUN pnpm install pm2 -g
 
-# Copiar todo el código fuente al contenedor
+# Copy the application source code into the container
 COPY . .
 
-# Instalar dependencias (incluye devDependencies para compilar)
+# Install dependencies using PNPM
 RUN pnpm install
 
-# Compilar el código TypeScript usando Rollup (asegúrate de tener el script "build" en package.json)
-RUN pnpm run build && ls -l /app
-
-# Etapa 2: Despliegue (deploy)
+# Create a new stage for deployment
 FROM builder as deploy
 
-# Establecer el directorio de trabajo
-WORKDIR /app
-
-# Copiar únicamente la carpeta compilada y archivos necesarios para producción
-COPY --from=builder /app/dist ./dist
+# Copy only necessary files and directories for deployment
+COPY --from=builder /app/src ./src
 COPY --from=builder /app/package.json /app/pnpm-lock.yaml ./
 
-# Instalar dependencias de producción (sin devDependencies)
+# Install production dependencies using frozen lock file
 RUN pnpm install --frozen-lockfile --production
 
-# Iniciar la aplicación usando PM2, apuntando al archivo compilado en la carpeta dist
-CMD ["pm2-runtime", "start", "./dist/app.js", "--cron", "0 */12 * * *"]
+# Define the command to start the application using PM2 runtime
+CMD ["pm2-runtime", "start", "./src/app.js", "--cron", "0 */12 * * *"]
