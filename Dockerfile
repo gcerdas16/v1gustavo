@@ -24,7 +24,7 @@ COPY . .
 RUN pnpm install
 
 # Compilar el código TypeScript usando Rollup (asegúrate de tener el script "build" en package.json)
-RUN pnpm run build
+RUN pnpm run build && ls -l /app
 
 # Etapa 2: Despliegue (deploy)
 FROM builder as deploy

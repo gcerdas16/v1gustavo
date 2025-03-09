@@ -4,7 +4,7 @@ export default {
     input: 'src/app.ts',
     output: {
         file: 'dist/app.js',
-        format: 'esm',
+        format: 'cjs',
     },
     onwarn: (warning) => {
         if (warning.code === 'UNRESOLVED_IMPORT') return
